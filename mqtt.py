@@ -65,6 +65,7 @@ def on_message(client, userdata, message):
         # Get cursor and write to table
         cursor = conn.cursor()
 
+        # Insert raw JSON into raw_json table
         cursor.execute(
             f"INSERT INTO {db_json_table} (id, json) VALUES (?, ?)", (0, payload_json_str)
         )
