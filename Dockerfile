@@ -20,4 +20,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD [ "python", "./mqtt.py" ]
+CMD [ "python", "-u", "./mqtt.py" ]
