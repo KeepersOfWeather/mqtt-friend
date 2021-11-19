@@ -67,12 +67,12 @@ def on_message(client, userdata, message):
 
         cursor.execute(
             f"INSERT INTO {db_json_table} (id, json) VALUES (?, ?)", (0, payload_json_str)
-            )
+        )
 
         # Commit to database
         conn.commit()
 
-        timestamp = datetime.now().strftime("%H:%M:%S %d-%b-%Y")
+        timestamp = datetime.datetime.now().strftime("%H:%M:%S %d-%b-%Y")
 
         print(f"{timestamp} Added new data to database!")
 
