@@ -2,6 +2,7 @@ import paho.mqtt.client as mqttClient
 import mariadb
 import json
 import os
+import datetime
 from threading import Event
 
 # The Things Network MQQT broker credentials
@@ -69,9 +70,11 @@ def on_message(client, userdata, message):
             )
 
         # Commit to database
-        conn.commit()    
+        conn.commit()
 
-        print("Added new data to database!")
+        timestamp = datetime.now().strftime("%H:%M:%S %d-%b-%Y")
+
+        print(f"{timestamp} Added new data to database!")
 
     except mariadb.Error as e:
         print(f"MariaDB error: {e}")
