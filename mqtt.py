@@ -73,9 +73,48 @@ def on_message(client, userdata, message):
         # Commit to database
         conn.commit()
 
-        timestamp = datetime.datetime.now().strftime("%H:%M:%S %d-%b-%Y")
+        # timestamp	timestamp [0000-00-00 00:00:00]	
+        timestamp = payload_json["received_at"].split(".")[0].replace("T", " ")
 
-        print(f"{timestamp} Added new data to database!")
+        payload_bytes = bytearray(payload_json["uplink_message"]["frm_payload"], "UTF-8")
+
+        # TODO: Decode weather data based on device or payload type?
+
+        # temperature_c	float
+        temperature_c = ((payload_bytes[2]-20)*10+payload_bytes[3])/10
+
+        # pressure_mbar	float	
+        pressure_mbar = payload_bytes[0]/2+950
+
+        # light	int(11)
+        light = payload_bytes[1]
+
+        # humidity_percent	float
+
+        # device_id	tinytext	
+        device_id = payload_json["end_device_ids"]["device_id"]
+
+        # gateway_id	tinytext
+        gateway_id = payload_json["uplink_message"]["rx_metadata"][0]["gateway_ids"]["gateway_id"]
+
+        # dev_eui	tinytext
+        dev_eui = payload_json["end_device_ids"]["dev_eui"]
+
+        # application_id	tinytext	
+        application_id = payload_json["end_device_ids"]["application_ids"]["m"]
+
+        # latitude	float	
+        latitude = payload_json["uplink_message"]["rx_metadata"][0]["location"]["latitude"]
+
+        # longitude	float	
+        longitude = payload_json["uplink_message"]["rx_metadata"][0]["location"]["longitude"]
+
+        # raw_payload	tinytext
+        raw_payload = payload_json["uplink_message"]["frm_payload"]
+
+        # TODO: insert into DB
+
+        print("{} Added new data to database!".format(datetime.datetime.now().strftime("%H:%M:%S %d-%b-%Y")))
 
     except mariadb.Error as e:
         print(f"MariaDB error: {e}")
