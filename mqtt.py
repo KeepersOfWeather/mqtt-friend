@@ -3,7 +3,6 @@ import mariadb
 import json
 import os
 import datetime
-import time
 from threading import Event
 
 # The Things Network MQQT broker credentials
