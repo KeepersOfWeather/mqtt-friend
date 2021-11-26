@@ -108,13 +108,13 @@ def on_message(client, userdata, message):
         # This is our decoded data from the payload
         decoded = decoded_payload[1]
 
-        if decoded_payload[0] is "lht":
+        if decoded_payload[0] == "lht":
             cursor.execute(
                 f"INSERT INTO {db_sensor_data_table} (timestamp, light_log_scale, light_lux, temperature, humidity, pressure, battery_status, battery_voltage, work_mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
                 (timestamp, None, decoded["light"], decoded["temp"], decoded["humidity"], None, decoded["battery_status"], decoded["battery_voltage"], decoded["mode"])
             )
 
-        elif decoded_payload[0] is "py":
+        elif decoded_payload[0] == "py":
             cursor.execute(
                 f"INSERT INTO {db_sensor_data_table} (timestamp, light_log_scale, light_lux, temperature, humidity, pressure, battery_status, battery_voltage, work_mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
                 (timestamp, decoded["light"], None, decoded["temp"], None, decoded["pressure"], None, None, None)
