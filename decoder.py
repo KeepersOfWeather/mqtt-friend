@@ -1,3 +1,5 @@
+# Made by: Max Thielen
+
 import base64
 
 def lht_decode(payload): 
