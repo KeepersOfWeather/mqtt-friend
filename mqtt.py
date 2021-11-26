@@ -158,8 +158,16 @@ def on_message(client, userdata, message):
     # longitude	float	
     longitude = payload_json["uplink_message"]["rx_metadata"][0]["location"]["longitude"]
 
-    # altitude	float	
-    altitude = payload_json["uplink_message"]["rx_metadata"][0]["location"]["altitude"]
+    try:
+        # altitude	float	
+        altitude = payload_json["uplink_message"]["rx_metadata"][0]["location"]["altitude"]
+
+    except KeyError:
+
+        # This sensor doesn't have altitude for some reason, just set it to to None
+
+        altitude = None
+    
 
     try:
         # Get cursor and write to table
