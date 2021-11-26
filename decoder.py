@@ -1,6 +1,6 @@
 import base64
 
-def lhtDecode(payload): 
+def lht_decode(payload): 
     msg = payload.encode("ascii")
     bytes = base64.b64decode(msg)
     
@@ -16,9 +16,11 @@ def lhtDecode(payload):
     batV = {}
     
     if ext==0x09:
+        # External temperature
     	tempDS = (bytes[0]<<24>>16 | bytes[1])/100
     	batS = bytes[4]>>6
     else:
+        # Battery stuff
         batV = ((bytes[0]<<8 | bytes[1]) & 0x3FFF)/1000
         batS = bytes[0]>>6
         
@@ -32,7 +34,7 @@ def lhtDecode(payload):
     if ext==0:
         ext_sensor ="No external sensor"
     elif ext==1:
-        ext_sensor = "Temperature Sensor";
+        ext_sensor = "Temperature Sensor"
         tempDS = (bytes[7]<<24>>16 | bytes[8])/100
     elif ext==4:
         mode = "Interrupt Sensor send"
@@ -56,14 +58,14 @@ def lhtDecode(payload):
         mode = "Interrupt Sensor count"
         extCount = bytes[7]<<8 | bytes[8]
     elif ext==8:
-        mode = "Interrupt Sensor count";
+        mode = "Interrupt Sensor count"
         extCount = bytes[7]<<24 | bytes[8]<<16 | bytes[9]<<8 | bytes[10]
     elif ext==9:
         mode = "DS18B20 & timestamp"
         time = bytes[7]<<24 | bytes[8]<<16 | bytes[9]<<8 | bytes[10] 
     elif ext==15:
-        mode = "DS18B20ID";
-        ID = str_pad(bytes[2])+str_pad(bytes[3])+str_pad(bytes[4])+str_pad(bytes[5])+str_pad(bytes[7])+str_pad(bytes[8])+str_pad(bytes[9])+str_pad(bytes[10]); 
+        mode = "DS18B20ID"
+        ID = bytes(bytes[2])+bytes(bytes[3])+bytes(bytes[4])+bytes(bytes[5])+bytes(bytes[7])+bytes(bytes[8])+bytes(bytes[9])+bytes(bytes[10]) 
     
     if(statusMsg==0): #and bytes.length == 11):
         decoded = {
@@ -83,15 +85,15 @@ def lhtDecode(payload):
         print(decoded["temp"])
         print(decoded["mode"])
         
-        return(decoded)
+        return decoded
     
     
-def pyDecode(payload):
+def py_decode(payload):
     msg = payload.encode("ascii")
     bytes = base64.b64decode(msg)
     
-    light = bytes[1];
-    pressure = bytes[0]/2+950;
+    light = bytes[1]
+    pressure = bytes[0]/2+950
     temp = ((bytes[2]-20)*10+bytes[3])/10
     
     decoded = {
@@ -108,10 +110,25 @@ def pyDecode(payload):
     
     return decoded
     
-  
-  
-py_payload = 'l70qAw=='
-pyDecode(py_payload)
+def decode(device_id: str, payload: str):
 
-lht_payload = 'zB4IQQHsBQEXf/8='
-lhtDecode(lht_payload)
+    if len(payload) > 8 and device_id.startswith("lht"):
+        # This is an LHT device for sure (long payload and starts with lht)
+        return lht_decode(payload)
+    
+    elif device_id.startswith("py") and len(payload) == 8:
+        # This is definitly a pyCom
+        return py_decode(payload)
+
+    else:
+        print(f"Payload doesn't match device: {device_id} with payload: {payload}")
+        return None
+
+  
+# py_payload = 'l70qAw=='
+# pyDecode(py_payload)
+
+# lht_payload = 'zB4IQQHsBQEXf/8='
+# lhtDecode(lht_payload)
+
+decode("py-wierden", "zB4IQQHsBQEXf/8=")
