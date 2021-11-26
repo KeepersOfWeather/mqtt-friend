@@ -114,15 +114,15 @@ def decode(device_id: str, payload: str):
 
     if len(payload) > 8 and device_id.startswith("lht"):
         # This is an LHT device for sure (long payload and starts with lht)
-        return lht_decode(payload)
+        return ("lht", lht_decode(payload))
     
     elif device_id.startswith("py") and len(payload) == 8:
         # This is definitly a pyCom
-        return py_decode(payload)
+        return ("py", py_decode(payload))
 
     else:
         print(f"Payload doesn't match device: {device_id} with payload: {payload}")
-        return None
+        return (None, None)
 
   
 # py_payload = 'l70qAw=='
@@ -131,4 +131,4 @@ def decode(device_id: str, payload: str):
 # lht_payload = 'zB4IQQHsBQEXf/8='
 # lhtDecode(lht_payload)
 
-decode("py-wierden", "zB4IQQHsBQEXf/8=")
+print(decode("lht-wierden", "l70qAw=="))

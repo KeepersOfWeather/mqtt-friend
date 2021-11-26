@@ -18,7 +18,12 @@ db_password = os.getenv("DB_PASSWORD")
 db_endpoint = os.getenv("DB_ENDPOINT") #
 db_port = os.getenv("DB_PORT")
 db_db = os.getenv("DB_DB")
-db_json_table = os.getenv("DB_JSON_TABLE") # 
+
+db_json_table = os.getenv("DB_JSON_TABLE", "raw_json")
+db_metadata_table = os.getenv("DB_METADATA_TABLE", "metadata")
+db_positional_table = os.getenv("DB_POSITIONAL_TABLE", "positional")
+db_sensor_data_table = os.getenv("DB_SENSOR_DATA_TABLE", "sensor_data")
+db_transmissional_data_table = os.getenv("DB_TRANSMISSIONAL_DATA_TABLE", "transmissional_data")
 
 # Check if we have all needed environment keys
 if not any([broker_endpoint, port, user, password, db_user, db_password, db_endpoint, db_port, db_db, db_json_table]):
@@ -77,20 +82,18 @@ def on_message(client, userdata, message):
         # timestamp	timestamp [0000-00-00 00:00:00]	
         timestamp = payload_json["received_at"].split(".")[0].replace("T", " ")
 
-        payload_bytes = bytearray(payload_json["uplink_message"]["frm_payload"], "UTF-8")
+        payload = payload_json["uplink_message"]["frm_payload"]
 
         # TODO: Decode weather data based on device or payload type?
+        decoded_payload = decoder.decode(payload)
 
-        # temperature_c	float
-        temperature_c = ((payload_bytes[2]-20)*10+payload_bytes[3])/10
+        # The payload doesn't match the device or the device is unknown
+        if not any(decoded_payload):
+            print("Not storing to database!")
+            return
 
-        # pressure_mbar	float	
-        pressure_mbar = payload_bytes[0]/2+950
-
-        # light	int(11)
-        light = payload_bytes[1]
-
-        # humidity_percent	float
+        if decoded_payload[0] is "py":
+            pass
 
         # device_id	tinytext	
         device_id = payload_json["end_device_ids"]["device_id"]
