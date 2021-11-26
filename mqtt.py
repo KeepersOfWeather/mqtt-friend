@@ -66,6 +66,8 @@ def on_message(client, userdata, message):
         print(f"Error parsing message from {client}")
         return
 
+    failed = False
+
     # Convert json object to string to dump into our database
     payload_json_str = str(json.dumps(payload_json, indent=4, sort_keys=False))
 
@@ -82,6 +84,7 @@ def on_message(client, userdata, message):
         conn.commit()
 
     except mariadb.Error as e:
+        failed = True
         print(f"MariaDB error: {e}")
 
     # timestamp	timestamp [0000-00-00 00:00:00]	
@@ -120,6 +123,7 @@ def on_message(client, userdata, message):
         conn.commit()
 
     except mariadb.Error as e:
+        failed = True
         print(f"MariaDB error: {e}")
 
     # We push these values to the metadata table:
@@ -128,7 +132,7 @@ def on_message(client, userdata, message):
     device_id = payload_json["end_device_ids"]["device_id"]
 
     # application_id	tinytext	
-    application_id = payload_json["end_device_ids"]["application_ids"]["m"]
+    application_id = payload_json["end_device_ids"]["application_ids"]["application_id"]
 
     # gateway_id	tinytext
     gateway_id = payload_json["uplink_message"]["rx_metadata"][0]["gateway_ids"]["gateway_id"]
@@ -145,6 +149,7 @@ def on_message(client, userdata, message):
         conn.commit()
 
     except mariadb.Error as e:
+        failed = True
         print(f"MariaDB error inserting metadata: {e}")
 
     # latitude	float	
@@ -168,6 +173,7 @@ def on_message(client, userdata, message):
         conn.commit()
 
     except mariadb.Error as e:
+        failed = True
         print(f"MariaDB error inserting positional data: {e}")
 
     # rssi
@@ -180,7 +186,7 @@ def on_message(client, userdata, message):
     spreading_factor = payload_json["uplink_message"]["settings"]["data_rate"]["lora"]["spreading_factor"]
 
     # consumed_airtime
-    consumed_airtime = payload_json["uplink_message"]["consumed_airtime"]
+    consumed_airtime = payload_json["uplink_message"]["consumed_airtime"].replace("s", "")
 
     # bandwidth
     bandwidth = payload_json["uplink_message"]["settings"]["data_rate"]["lora"]["bandwidth"]
@@ -194,24 +200,18 @@ def on_message(client, userdata, message):
 
         cursor.execute(
             f"INSERT INTO {db_transmissional_data_table} (timestamp, rssi, snr, spreading_factor, consumed_airtime, bandwidth, frequency) VALUES (?, ?, ?, ?, ?, ?, ?)", 
-            (timestamp, rssi, snr, spreading_factor, consumed_airtime, bandwidth, frequency)
+            (timestamp, int(rssi), float(snr), int(spreading_factor), float(consumed_airtime), int(bandwidth), int(frequency))
         )
 
         conn.commit()
 
     except mariadb.Error as e:
+        failed = True
         print(f"MariaDB error inserting transmissional data: {e}")
 
-    try:
+    if not failed:
         print("{} Added new data to database!".format(datetime.datetime.now().strftime("%H:%M:%S %d-%b-%Y")))
 
-    except mariadb.Error as e:
-        print(f"MariaDB error: {e}")
-
-    # dev_name = weatherInfo["dev_id"]
-    # dev_serial = weatherInfo['metadata']['gateways'][0]['gtw_id']
-    # dev_dt = weatherInfo['metadata']['gateways'][0]['time']
-    # raw_id = (dev_serial, dev_dt)
 
 client = mqttClient.Client()  # create new instance
 
