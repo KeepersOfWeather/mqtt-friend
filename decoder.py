@@ -76,14 +76,14 @@ def lht_decode(payload):
              "battery_status": batS,
              "battery_voltage": batV
         }
-        print(decoded)
-        print()
-        print(decoded["battery_voltage"])
-        print(decoded["battery_status"])
-        print(decoded["humidity"])
-        print(decoded["light"])
-        print(decoded["temp"])
-        print(decoded["mode"])
+        # print(decoded)
+        # print()
+        # print(decoded["battery_voltage"])
+        # print(decoded["battery_status"])
+        # print(decoded["humidity"])
+        # print(decoded["light"])
+        # print(decoded["temp"])
+        # print(decoded["mode"])
         
         return decoded
     
@@ -102,11 +102,11 @@ def py_decode(payload):
         "pressure": pressure,
     }
     
-    print(decoded)
-    print()
-    print(decoded["light"])
-    print(decoded["pressure"])
-    print(decoded["temp"])
+    # print(decoded)
+    # print()
+    # print(decoded["light"])
+    # print(decoded["pressure"])
+    # print(decoded["temp"])
     
     return decoded
     

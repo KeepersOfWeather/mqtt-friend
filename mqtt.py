@@ -133,26 +133,7 @@ def on_message(client, userdata, message):
     # gateway_id	tinytext
     gateway_id = payload_json["uplink_message"]["rx_metadata"][0]["gateway_ids"]["gateway_id"]
 
-    try:
-        # Get cursor and write to table
-        cursor = conn.cursor()
-
-        # Insert raw JSON into raw_json table
-        cursor.execute(
-            f"INSERT INTO {db_metadata_table} (timestamp, device_id, application_id, gateway_id) VALUES (?, ?, ?, ?)", 
-            (timestamp, device_id, application_id, gateway_id)
-        )
-
-        # Commit to database
-        conn.commit()
-
-        
-    except mariadb.Error as e:
-        print(f"MariaDB error: {e}")
-
-   
-
-            # device_id	tinytext	
+    # device_id	tinytext	
     device_id = payload_json["end_device_ids"]["device_id"]
 
     # latitude	float	
