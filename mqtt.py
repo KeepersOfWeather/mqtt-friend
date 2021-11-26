@@ -95,6 +95,11 @@ def on_message(client, userdata, message):
         if decoded_payload[0] is "py":
             pass
 
+        if decoded_payload[0] is "lht":
+            cursor.execute(
+                 f"INSERT INTO {db_sensor_data_table} (timestamp, light, temperature, humidity, pressure, battery_status, battery_volatage, work_mode) VALUES (?, ?)", (timestamp, decoded_payload["light"], decoded_payload["temp"],decoded_payload["humidity"], None, decoded_payload["battery_status"], decoded_payload["battery_voltage"], decoded_payload["mode"])
+            )
+
         # device_id	tinytext	
         device_id = payload_json["end_device_ids"]["device_id"]
 
