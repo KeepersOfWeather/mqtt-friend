@@ -92,8 +92,11 @@ def on_message(client, userdata, message):
 
     payload = payload_json["uplink_message"]["frm_payload"]
 
+    # device_id	tinytext	
+    device_id = payload_json["end_device_ids"]["device_id"]
+
     # TODO: Decode weather data based on device or payload type?
-    decoded_payload = decoder.decode(payload)
+    decoded_payload = decoder.decode(device_id, payload)
 
     # The payload doesn't match the device or the device is unknown
     if not any(decoded_payload):
@@ -127,9 +130,6 @@ def on_message(client, userdata, message):
         print(f"MariaDB error: {e}")
 
     # We push these values to the metadata table:
-
-    # device_id	tinytext	
-    device_id = payload_json["end_device_ids"]["device_id"]
 
     # application_id	tinytext	
     application_id = payload_json["end_device_ids"]["application_ids"]["application_id"]
