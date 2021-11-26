@@ -133,8 +133,19 @@ def on_message(client, userdata, message):
     # gateway_id	tinytext
     gateway_id = payload_json["uplink_message"]["rx_metadata"][0]["gateway_ids"]["gateway_id"]
 
-    # device_id	tinytext	
-    device_id = payload_json["end_device_ids"]["device_id"]
+    try:
+        # Get cursor and write to table
+        cursor = conn.cursor()
+
+        cursor.execute(
+            f"INSERT INTO {db_metadata_table} (timestamp, device_id, application_id, gateway_id) VALUES (?, ?, ?, ?)", 
+            (timestamp, device_id, application_id, gateway_id)
+        )
+
+        conn.commit()
+
+    except mariadb.Error as e:
+        print(f"MariaDB error inserting metadata: {e}")
 
     # latitude	float	
     latitude = payload_json["uplink_message"]["rx_metadata"][0]["location"]["latitude"]
@@ -142,13 +153,56 @@ def on_message(client, userdata, message):
     # longitude	float	
     longitude = payload_json["uplink_message"]["rx_metadata"][0]["location"]["longitude"]
 
-    # raw_payload	tinytext
-    raw_payload = payload_json["uplink_message"]["frm_payload"]
-
-    # TODO: insert into DB
+    # altitude	float	
+    altitude = payload_json["uplink_message"]["rx_metadata"][0]["location"]["altitude"]
 
     try:
+        # Get cursor and write to table
+        cursor = conn.cursor()
 
+        cursor.execute(
+            f"INSERT INTO {db_positional_table} (timestamp, latitude, longitude, altitude) VALUES (?, ?, ?, ?)", 
+            (timestamp, latitude, longitude, altitude)
+        )
+
+        conn.commit()
+
+    except mariadb.Error as e:
+        print(f"MariaDB error inserting positional data: {e}")
+
+    # rssi
+    rssi = payload_json["uplink_message"]["rx_metadata"][0]["rssi"]
+
+    # snr
+    snr = payload_json["uplink_message"]["rx_metadata"][0]["snr"]
+
+    # spreading_factor
+    spreading_factor = payload_json["uplink_message"]["settings"]["data_rate"]["lora"]["spreading_factor"]
+
+    # consumed_airtime
+    consumed_airtime = payload_json["uplink_message"]["consumed_airtime"]
+
+    # bandwidth
+    bandwidth = payload_json["uplink_message"]["settings"]["data_rate"]["lora"]["bandwidth"]
+
+    # frequency
+    frequency = payload_json["uplink_message"]["settings"]["frequency"]
+
+    try:
+        # Get cursor and write to table
+        cursor = conn.cursor()
+
+        cursor.execute(
+            f"INSERT INTO {db_transmissional_data_table} (timestamp, rssi, snr, spreading_factor, consumed_airtime, bandwidth, frequency) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+            (timestamp, rssi, snr, spreading_factor, consumed_airtime, bandwidth, frequency)
+        )
+
+        conn.commit()
+
+    except mariadb.Error as e:
+        print(f"MariaDB error inserting transmissional data: {e}")
+
+    try:
         print("{} Added new data to database!".format(datetime.datetime.now().strftime("%H:%M:%S %d-%b-%Y")))
 
     except mariadb.Error as e:
