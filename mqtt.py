@@ -193,7 +193,7 @@ def on_message(client, userdata, message):
 
     except KeyError:
         # This message doesn't have SNR for some reason, ignore it
-        snr = None
+        snr = 0.0
 
     # spreading_factor
     spreading_factor = payload_json["uplink_message"]["settings"]["data_rate"]["lora"]["spreading_factor"]
