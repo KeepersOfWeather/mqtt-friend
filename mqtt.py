@@ -95,12 +95,12 @@ def on_message(client, userdata, message):
             f"SELECT id FROM {db_metadata_table} ORDER BY id DESC LIMIT 1"
         )
 
-        last_id = cursor.fetchall()
+        last_id = cursor.fetchall() # This will look like [(n,)]
 
         if not last_id: # rows = [] There are no new rows
             next_id = 0
         else:
-            next_id = int(last_id[0]) + 1
+            next_id = int(last_id[0][0]) + 1
 
     except mariadb.Error as e:
         failed = True
