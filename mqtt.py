@@ -187,8 +187,13 @@ def on_message(client, userdata, message):
     # rssi
     rssi = payload_json["uplink_message"]["rx_metadata"][0]["rssi"]
 
-    # snr
-    snr = payload_json["uplink_message"]["rx_metadata"][0]["snr"]
+    try:
+        # snr
+        snr = payload_json["uplink_message"]["rx_metadata"][0]["snr"]
+
+    except KeyError:
+        # This message doesn't have SNR for some reason, ignore it
+        snr = None
 
     # spreading_factor
     spreading_factor = payload_json["uplink_message"]["settings"]["data_rate"]["lora"]["spreading_factor"]
