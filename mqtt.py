@@ -209,7 +209,7 @@ def on_message(client, userdata, message):
 
     except KeyError:
         # This message doesn't have SNR for some reason, ignore it
-        snr = 0.0 # If you put None here SQL will get upset and throw an error
+        snr = None # If you put None here SQL will get upset and throw an error
 
     # spreading_factor
     spreading_factor = payload_json["uplink_message"]["settings"]["data_rate"]["lora"]["spreading_factor"]
