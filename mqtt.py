@@ -205,7 +205,7 @@ def on_message(client, userdata, message):
 
     try:
         # snr
-        snr = payload_json["uplink_message"]["rx_metadata"][0]["snr"]
+        snr = float(payload_json["uplink_message"]["rx_metadata"][0]["snr"])
 
     except KeyError:
         # This message doesn't have SNR for some reason, ignore it
@@ -229,7 +229,7 @@ def on_message(client, userdata, message):
 
         cursor.execute(
             f"INSERT INTO {db_transmissional_data_table} (id, rssi, snr, spreading_factor, consumed_airtime, bandwidth, frequency) VALUES (?, ?, ?, ?, ?, ?, ?)", 
-            (next_id, int(rssi), float(snr), int(spreading_factor), float(consumed_airtime), int(bandwidth), int(frequency))
+            (next_id, int(rssi), snr, int(spreading_factor), float(consumed_airtime), int(bandwidth), int(frequency))
         )
 
     except mariadb.Error as e:
