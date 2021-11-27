@@ -87,6 +87,28 @@ def on_message(client, userdata, message):
         failed = True
         print(f"MariaDB error: {e}")
 
+    # Get next ID from our metadata table
+    try:
+        cursor = conn.cursor()
+
+        cursor.execute(
+            f"SELECT id FROM {db_metadata_table} ORDER BY id DESC LIMIT 1"
+        )
+
+        last_id = cursor.fetchall()
+
+        if not last_id: # rows = [] There are no new rows
+            next_id = 0
+        else:
+            next_id = int(last_id[0]) + 1
+
+    except mariadb.Error as e:
+        failed = True
+        print(f"Error calculating ID: {e}")
+
+        # We have no idea what the next id should be, just error out and log
+        return
+
     # timestamp	timestamp [0000-00-00 00:00:00]	
     timestamp = payload_json["received_at"].split(".")[0].replace("T", " ")
 
@@ -113,17 +135,15 @@ def on_message(client, userdata, message):
 
         if decoded_payload[0] == "lht":
             cursor.execute(
-                f"INSERT INTO {db_sensor_data_table} (timestamp, light_log_scale, light_lux, temperature, humidity, pressure, battery_status, battery_voltage, work_mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
-                (timestamp, None, decoded["light"], decoded["temp"], decoded["humidity"], None, decoded["battery_status"], decoded["battery_voltage"], decoded["mode"])
+                f"INSERT INTO {db_sensor_data_table} (id, light_log_scale, light_lux, temperature, humidity, pressure, battery_status, battery_voltage, work_mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+                (next_id, None, decoded["light"], decoded["temp"], decoded["humidity"], None, decoded["battery_status"], decoded["battery_voltage"], decoded["mode"])
             )
 
         elif decoded_payload[0] == "py":
             cursor.execute(
-                f"INSERT INTO {db_sensor_data_table} (timestamp, light_log_scale, light_lux, temperature, humidity, pressure, battery_status, battery_voltage, work_mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
-                (timestamp, decoded["light"], None, decoded["temp"], None, decoded["pressure"], None, None, None)
+                f"INSERT INTO {db_sensor_data_table} (id, light_log_scale, light_lux, temperature, humidity, pressure, battery_status, battery_voltage, work_mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+                (next_id, decoded["light"], None, decoded["temp"], None, decoded["pressure"], None, None, None)
             )
-
-        conn.commit()
 
     except mariadb.Error as e:
         failed = True
@@ -142,11 +162,9 @@ def on_message(client, userdata, message):
         cursor = conn.cursor()
 
         cursor.execute(
-            f"INSERT INTO {db_metadata_table} (timestamp, device_id, application_id, gateway_id) VALUES (?, ?, ?, ?)", 
-            (timestamp, device_id, application_id, gateway_id)
+            f"INSERT INTO {db_metadata_table} (id, timestamp, device, application, gateway) VALUES (?, ?, ?, ?, ?)", 
+            (next_id, timestamp, device_id, application_id, gateway_id)
         )
-
-        conn.commit()
 
     except mariadb.Error as e:
         failed = True
@@ -174,11 +192,9 @@ def on_message(client, userdata, message):
         cursor = conn.cursor()
 
         cursor.execute(
-            f"INSERT INTO {db_positional_table} (timestamp, latitude, longitude, altitude) VALUES (?, ?, ?, ?)", 
-            (timestamp, latitude, longitude, altitude)
+            f"INSERT INTO {db_positional_table} (id, latitude, longitude, altitude) VALUES (?, ?, ?, ?)", 
+            (next_id, latitude, longitude, altitude)
         )
-
-        conn.commit()
 
     except mariadb.Error as e:
         failed = True
@@ -193,7 +209,7 @@ def on_message(client, userdata, message):
 
     except KeyError:
         # This message doesn't have SNR for some reason, ignore it
-        snr = 0.0
+        snr = 0.0 # If you put None here SQL will get upset and throw an error
 
     # spreading_factor
     spreading_factor = payload_json["uplink_message"]["settings"]["data_rate"]["lora"]["spreading_factor"]
@@ -212,19 +228,20 @@ def on_message(client, userdata, message):
         cursor = conn.cursor()
 
         cursor.execute(
-            f"INSERT INTO {db_transmissional_data_table} (timestamp, rssi, snr, spreading_factor, consumed_airtime, bandwidth, frequency) VALUES (?, ?, ?, ?, ?, ?, ?)", 
-            (timestamp, int(rssi), float(snr), int(spreading_factor), float(consumed_airtime), int(bandwidth), int(frequency))
+            f"INSERT INTO {db_transmissional_data_table} (id, rssi, snr, spreading_factor, consumed_airtime, bandwidth, frequency) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+            (next_id, int(rssi), float(snr), int(spreading_factor), float(consumed_airtime), int(bandwidth), int(frequency))
         )
-
-        conn.commit()
 
     except mariadb.Error as e:
         failed = True
         print(f"MariaDB error inserting transmissional data: {e}")
 
-    if not failed:
-        print("{} Added new data to database!".format(datetime.datetime.now().strftime("%H:%M:%S %d-%b-%Y")))
+    if failed:
+        conn.rollback()
 
+    else: # Everything worked out fine, we commit to database
+        conn.commit()
+        print("{} Added new data to database!".format(datetime.datetime.now().strftime("%H:%M:%S %d-%b-%Y")))
 
 client = mqttClient.Client()  # create new instance
 
