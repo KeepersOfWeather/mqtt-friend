@@ -112,7 +112,18 @@ def on_message(client, userdata, message):
     # timestamp	timestamp [0000-00-00 00:00:00]	
     timestamp = payload_json["received_at"].split(".")[0].replace("T", " ")
 
+    try:
+
+        uplink_msg = payload_json["uplink_message"]
+
+    except KeyError:
+
+        print("Received a message without uplink message... ignoring it.")
+        return
+
     payload = payload_json["uplink_message"]["frm_payload"]
+
+    
 
     # device_id	tinytext	
     device_id = payload_json["end_device_ids"]["device_id"]
