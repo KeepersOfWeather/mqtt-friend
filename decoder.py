@@ -10,15 +10,15 @@ def lht_decode(payload):
 
     request = requests.get("https://lhtdecoderofnptx7a-test.functions.fnc.fr-par.scw.cloud/", data = '{"bytes": [203, 244, 255, 140, 3, 232, 5, 0, 0, 127, 255]}')
 
-    output = json.loads(request.text)['decoded']
+    output = json.loads(request.text)
 
     decoded = {
-             "mode": output["Work_mode"],
-             "light": output["ILL_lx"],
-             "temp": output["TempC_SHT"],
-             "humidity": output["Hum_SHT"],
-             "battery_status": output["Bat_status"],
-             "battery_voltage": output["BatV"]
+             "mode": output['decoded']["Work_mode"],
+             "light": output['decoded']["ILL_lx"],
+             "temp": output['decoded']["TempC_SHT"],
+             "humidity": output['decoded']["Hum_SHT"],
+             "battery_status": output['decoded']["Bat_status"],
+             "battery_voltage": output['decoded']["BatV"]
         }
 
     return decoded
