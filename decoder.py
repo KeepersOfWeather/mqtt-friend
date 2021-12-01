@@ -10,7 +10,7 @@ def lht_decode(payload):
 
     request = requests.get("https://lhtdecoderofnptx7a-test.functions.fnc.fr-par.scw.cloud/", data = '{"bytes": [203, 244, 255, 140, 3, 232, 5, 0, 0, 127, 255]}')
 
-    output = json.loads(request.text)
+    output = json.loads(request.text)['decoded']
 
     decoded = {
              "mode": output["Work_mode"],
