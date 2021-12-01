@@ -8,7 +8,7 @@ def lht_decode(payload):
     msg = payload.encode("ascii")
     bytes = list(base64.b64decode(msg))
 
-    request = requests.get("https://lhtdecoderofnptx7a-test.functions.fnc.fr-par.scw.cloud/", data = '{"bytes": [203, 244, 255, 140, 3, 232, 5, 0, 0, 127, 255]}')
+    request = requests.get("https://lhtdecoderofnptx7a-test.functions.fnc.fr-par.scw.cloud/", data = '{"bytes": {}}'.format(bytes))
 
     output = json.loads(request.text)
 
