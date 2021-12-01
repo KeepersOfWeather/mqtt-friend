@@ -122,9 +122,7 @@ def on_message(client, userdata, message):
         return
 
     payload = payload_json["uplink_message"]["frm_payload"]
-
     
-
     # device_id	tinytext	
     device_id = payload_json["end_device_ids"]["device_id"]
 

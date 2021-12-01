@@ -1,10 +1,27 @@
 # Made by: Max Thielen
 
 import base64
+import requests
+import json
 
 def lht_decode(payload): 
     msg = payload.encode("ascii")
-    bytes = base64.b64decode(msg)
+    bytes = list(base64.b64decode(msg))
+
+    request = requests.get("https://lhtdecoderofnptx7a-test.functions.fnc.fr-par.scw.cloud/", data = '{"bytes": [203, 244, 255, 140, 3, 232, 5, 0, 0, 127, 255]}')
+
+    output = json.loads(request.text)
+
+    decoded = {
+             "mode": output["Work_mode"],
+             "light": output["ILL_lx"],
+             "temp": output["TempC_SHT"],
+             "humidity": output["Hum_SHT"],
+             "battery_status": output["Bat_status"],
+             "battery_voltage": output["BatV"]
+        }
+
+    return decoded
     
     ext = bytes[6]&0x0F
     statusMsg = (bytes[6]&0x40)>>6
@@ -27,6 +44,15 @@ def lht_decode(payload):
         batS = bytes[0]>>6
         
     if ext!=0x0f:
+
+        value=bytes[2]<<8 | bytes[3]; 
+        print(value)
+        if(bytes[2] & 0x80):
+            value |= 0xFFFF0000
+        
+        print(value/100)
+
+
         tempSHT = (bytes[2]<<24>>16 | bytes[3])/100
         hum = ((bytes[4]<<8 | bytes[5])&0xFFF)/10
 
@@ -134,4 +160,4 @@ def decode(device_id: str, payload: str):
 # lhtDecode(lht_payload)
 
 if __name__ == "__main__":
-    print(decode("lht-gronau", "zB4IQQHsBQEXf/8="))
+    print(decode("lht-gronau", "y/T/jAPoBQAAf/8="))
