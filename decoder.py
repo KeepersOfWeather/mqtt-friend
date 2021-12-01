@@ -17,109 +17,16 @@ def lht_decode(payload):
     output = json.loads(request.text)
 
     decoded = {
-             "mode": output['decoded']["Work_mode"],
-             "light": output['decoded']["ILL_lx"],
-             "temp": output['decoded']["TempC_SHT"],
-             "humidity": output['decoded']["Hum_SHT"],
-             "battery_status": output['decoded']["Bat_status"],
-             "battery_voltage": output['decoded']["BatV"]
-        }
+        "mode": output['decoded']["Work_mode"],
+        "light": output['decoded']["ILL_lx"],
+        "temp": output['decoded']["TempC_SHT"],
+        "humidity": output['decoded']["Hum_SHT"],
+        "battery_status": output['decoded']["Bat_status"],
+        "battery_voltage": output['decoded']["BatV"]
+    }
 
     return decoded
-    
-    ext = bytes[6]&0x0F
-    statusMsg = (bytes[6]&0x40)>>6
-    connect = (bytes[6]&0x80)>>7
-    
-    mode = {}
-    light = {}
-    tempSHT = {}
-    hum = {}
-    batS = {}
-    batV = {}
-    
-    if ext==0x09:
-        # External temperature
-    	tempDS = (bytes[0]<<24>>16 | bytes[1])/100
-    	batS = bytes[4]>>6
-    else:
-        # Battery stuff
-        batV = ((bytes[0]<<8 | bytes[1]) & 0x3FFF)/1000
-        batS = bytes[0]>>6
-        
-    if ext!=0x0f:
 
-        value=bytes[2]<<8 | bytes[3]; 
-        print(value)
-        if(bytes[2] & 0x80):
-            value |= 0xFFFF0000
-        
-        print(value/100)
-
-
-        tempSHT = (bytes[2]<<24>>16 | bytes[3])/100
-        hum = ((bytes[4]<<8 | bytes[5])&0xFFF)/10
-
-    if connect=='1':
-        No_connect = "Sensor no connection"
-
-    if ext==0:
-        ext_sensor ="No external sensor"
-    elif ext==1:
-        ext_sensor = "Temperature Sensor"
-        tempDS = (bytes[7]<<24>>16 | bytes[8])/100
-    elif ext==4:
-        mode = "Interrupt Sensor send"
-        if bytes[7]:
-            val = "High"
-        else:
-            val = "Low"
-        extPin = val
-        if bytes[8]:
-            val = "True"
-        else:
-            val = "False"
-        extStatus = val
-    elif ext==5:
-        mode = "Illumination Sensor"
-        light = bytes[7]<<8 | bytes[8]
-    elif ext==6:
-        mode = "ADC Sensor"
-        adcV = (bytes[7]<<8 | bytes[8])/1000
-    elif ext==7:
-        mode = "Interrupt Sensor count"
-        extCount = bytes[7]<<8 | bytes[8]
-    elif ext==8:
-        mode = "Interrupt Sensor count"
-        extCount = bytes[7]<<24 | bytes[8]<<16 | bytes[9]<<8 | bytes[10]
-    elif ext==9:
-        mode = "DS18B20 & timestamp"
-        time = bytes[7]<<24 | bytes[8]<<16 | bytes[9]<<8 | bytes[10] 
-    elif ext==15:
-        mode = "DS18B20ID"
-        ID = bytes(bytes[2])+bytes(bytes[3])+bytes(bytes[4])+bytes(bytes[5])+bytes(bytes[7])+bytes(bytes[8])+bytes(bytes[9])+bytes(bytes[10]) 
-    
-    if(statusMsg==0): #and bytes.length == 11):
-        decoded = {
-             "mode": mode,
-             "light": light,
-             "temp": tempSHT,
-             "humidity": hum,
-             "battery_status": batS,
-             "battery_voltage": batV
-        }
-        # print(decoded)
-        # print()
-        # print(decoded["battery_voltage"])
-        # print(decoded["battery_status"])
-        # print(decoded["humidity"])
-        # print(decoded["light"])
-        # print(decoded["temp"])
-        # print(decoded["mode"])
-        
-        return decoded
-    
-    
 def py_decode(payload):
     msg = payload.encode("ascii")
     bytes = base64.b64decode(msg)
@@ -164,4 +71,4 @@ def decode(device_id: str, payload: str):
 # lhtDecode(lht_payload)
 
 if __name__ == "__main__":
-    print(decode("lht-gronau", "y+8DZgPgBQI2f/8="))
+    print(decode("lht-gronau", "y/T/jAPoBQAAf/8="))
