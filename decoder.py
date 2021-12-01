@@ -164,4 +164,4 @@ def decode(device_id: str, payload: str):
 # lhtDecode(lht_payload)
 
 if __name__ == "__main__":
-    print(decode("lht-gronau", "y/T/jAPoBQAAf/8="))
+    print(decode("lht-gronau", "y+8DZgPgBQI2f/8="))
