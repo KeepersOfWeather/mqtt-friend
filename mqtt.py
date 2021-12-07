@@ -58,18 +58,7 @@ def on_connect(client, userdata, flags, rc):
     else:
         print(f"Connection failed (rc: {rc})")
 
-def on_message(client, userdata, message):
-    try:
-        payload_json = json.loads(message.payload)
-        
-    except ValueError as e:
-        print(f"Error parsing message from {client}")
-        return
-
-    failed = False
-
-    # Convert json object to string to dump into our database
-    payload_json_str = str(json.dumps(payload_json, indent=4, sort_keys=False))
+def ingest(payload_json_str):
 
     try:
         # Get cursor and write to table
@@ -103,9 +92,7 @@ def on_message(client, userdata, message):
             next_id = int(last_id[0][0]) + 1
 
     except mariadb.Error as e:
-        failed = True
         print(f"Error calculating ID: {e}")
-
         # We have no idea what the next id should be, just error out and log
         return
 
@@ -113,11 +100,9 @@ def on_message(client, userdata, message):
     timestamp = payload_json["received_at"].split(".")[0].replace("T", " ")
 
     try:
-
         uplink_msg = payload_json["uplink_message"]
 
     except KeyError:
-
         print("Received a message without uplink message... ignoring it.")
         return
 
@@ -155,8 +140,9 @@ def on_message(client, userdata, message):
             )
 
     except mariadb.Error as e:
-        failed = True
-        print(f"MariaDB error: {e}")
+        conn.rollback()
+        print(f"MariaDB error inserting sensor_data: {e}")
+        return
 
     # We push these values to the metadata table:
 
@@ -176,8 +162,9 @@ def on_message(client, userdata, message):
         )
 
     except mariadb.Error as e:
-        failed = True
+        conn.rollback()
         print(f"MariaDB error inserting metadata: {e}")
+        return
 
     # latitude	float	
     latitude = payload_json["uplink_message"]["rx_metadata"][0]["location"]["latitude"]
@@ -190,9 +177,7 @@ def on_message(client, userdata, message):
         altitude = payload_json["uplink_message"]["rx_metadata"][0]["location"]["altitude"]
 
     except KeyError:
-
         # This sensor doesn't have altitude for some reason, just set it to to None
-
         altitude = None
     
 
@@ -206,8 +191,9 @@ def on_message(client, userdata, message):
         )
 
     except mariadb.Error as e:
-        failed = True
+        conn.rollback()
         print(f"MariaDB error inserting positional data: {e}")
+        return
 
     # rssi
     rssi = payload_json["uplink_message"]["rx_metadata"][0]["rssi"]
@@ -242,15 +228,26 @@ def on_message(client, userdata, message):
         )
 
     except mariadb.Error as e:
-        failed = True
-        print(f"MariaDB error inserting transmissional data: {e}")
-
-    if failed:
         conn.rollback()
+        print(f"MariaDB error inserting transmissional data: {e}")
+        return
 
-    else: # Everything worked out fine, we commit to database
-        conn.commit()
-        print("{} Added new data to database!".format(datetime.datetime.now().strftime("%H:%M:%S %d-%b-%Y")))
+    # If something failed, this won't be reached, so we're sure everything's safe now
+    conn.commit()
+    print("{} Added new data to database!".format(datetime.datetime.now().strftime("%H:%M:%S %d-%b-%Y")))
+
+def on_message(client, userdata, message):
+    try:
+        payload_json = json.loads(message.payload)
+        
+    except ValueError as e:
+        print(f"Error parsing message from {client}")
+        return
+
+    # Convert json object to string to dump into our database
+    payload_json_str = str(json.dumps(payload_json, indent=4, sort_keys=False))
+
+    ingest(payload_json_str)
 
 client = mqttClient.Client()  # create new instance
 
