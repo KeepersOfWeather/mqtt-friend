@@ -58,7 +58,11 @@ def on_connect(client, userdata, flags, rc):
     else:
         print(f"Connection failed (rc: {rc})")
 
-def ingest(payload_json_str):
+def ingest(payload_json):
+
+    # Convert json object to string to dump into our database
+    payload_json_str = str(json.dumps(payload_json, indent=4, sort_keys=False))
+
 
     try:
         # Get cursor and write to table
@@ -244,10 +248,7 @@ def on_message(client, userdata, message):
         print(f"Error parsing message from {client}")
         return
 
-    # Convert json object to string to dump into our database
-    payload_json_str = str(json.dumps(payload_json, indent=4, sort_keys=False))
-
-    ingest(payload_json_str)
+    ingest(payload_json)
 
 client = mqttClient.Client()  # create new instance
 
