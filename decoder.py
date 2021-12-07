@@ -41,14 +41,25 @@ def py_decode(payload):
         "pressure": pressure,
     }
     
-    # print(decoded)
-    # print()
-    # print(decoded["light"])
-    # print(decoded["pressure"])
-    # print(decoded["temp"])
-    
     return decoded
     
+def lopy_decode(payload):
+    msg = payload.encode("ascii")
+    bytes = base64.b64decode(msg)
+    
+    pressure = bytes[0]+950
+    light = bytes[1]
+    temp = float(f"{bytes[2]}.{bytes[3]}")
+    
+    decoded = {
+        "light": light,
+        "temp": temp,
+        "pressure": pressure,
+    }
+
+    return decoded
+    
+
 def decode(device_id: str, payload: str):
 
     if len(payload) > 8 and device_id.startswith("lht"):
@@ -58,6 +69,10 @@ def decode(device_id: str, payload: str):
     elif device_id.startswith("py") and len(payload) == 8:
         # This is definitly a pyCom
         return ("py", py_decode(payload))
+
+    elif device_id.startswith("lopy") and len(payload) == 8:
+        # This is definitly a pyCom
+        return ("lopy", lopy_decode(payload))
 
     else:
         print(f"Payload doesn't match device: {device_id} with payload: {payload}")
@@ -71,4 +86,4 @@ def decode(device_id: str, payload: str):
 # lhtDecode(lht_payload)
 
 if __name__ == "__main__":
-    print(decode("lht-gronau", "y/T/jAPoBQAAf/8="))
+    print(decode("lopy-gronau", "NYYYGQ=="))

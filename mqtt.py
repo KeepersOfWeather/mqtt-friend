@@ -63,7 +63,6 @@ def ingest(payload_json):
     # Convert json object to string to dump into our database
     payload_json_str = str(json.dumps(payload_json, indent=4, sort_keys=False))
 
-
     try:
         # Get cursor and write to table
         cursor = conn.cursor()
