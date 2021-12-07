@@ -136,7 +136,7 @@ def ingest(payload_json):
                 (next_id, None, decoded["light"], decoded["temp"], decoded["humidity"], None, decoded["battery_status"], decoded["battery_voltage"], decoded["mode"])
             )
 
-        elif decoded_payload[0] == "py":
+        elif decoded_payload[0] in [ "py", "lopy" ]:
             cursor.execute(
                 f"INSERT INTO {db_sensor_data_table} (id, light_log_scale, light_lux, temperature, humidity, pressure, battery_status, battery_voltage, work_mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
                 (next_id, decoded["light"], None, decoded["temp"], None, decoded["pressure"], None, None, None)
