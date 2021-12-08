@@ -76,8 +76,9 @@ def ingest(payload_json):
         conn.commit()
 
     except mariadb.Error as e:
-        failed = True
-        print(f"MariaDB error: {e}")
+        print(f"Error inserting JSON message: {e}")
+        conn.rollback()
+        return
 
     # Get next ID from our metadata table
     try:
@@ -119,7 +120,7 @@ def ingest(payload_json):
 
     # The payload doesn't match the device or the device is unknown
     if not any(decoded_payload):
-        print("Not storing to database!")
+        print("Decoder returned blank, not storing to database!")
         return
 
     try:

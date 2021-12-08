@@ -14,7 +14,12 @@ def lht_decode(payload):
 
     request = requests.get("https://lhtdecoderofnptx7a-test.functions.fnc.fr-par.scw.cloud/", data = json.dumps(data))
 
-    output = json.loads(request.text)
+
+    try:
+        output = json.loads(request.json())
+    except Exception as e:
+        print(f"Error with decoding LHT data ({payload}):\n{e}")
+        return {}
 
     decoded = {
         "mode": output['decoded']["Work_mode"],
@@ -64,7 +69,12 @@ def decode(device_id: str, payload: str):
 
     if len(payload) > 8 and device_id.startswith("lht"):
         # This is an LHT device for sure (long payload and starts with lht)
-        return ("lht", lht_decode(payload))
+        decoded = lht_decode(payload)
+
+        if decoded == {}:
+            return ()
+
+        return ("lht", decoded)
     
     elif device_id.startswith("py") and len(payload) == 8:
         # This is definitly a pyCom
