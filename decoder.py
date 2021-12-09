@@ -15,11 +15,7 @@ def lht_decode(payload):
     request = requests.get("https://lhtdecoderofnptx7a-test.functions.fnc.fr-par.scw.cloud/", data = json.dumps(data))
 
 
-    try:
-        output = json.loads(request.json())
-    except Exception as e:
-        print(f"Error with decoding LHT data ({payload}):\n{e}")
-        return {}
+    output = request.json()
 
     decoded = {
         "mode": output['decoded']["Work_mode"],
@@ -96,4 +92,4 @@ def decode(device_id: str, payload: str):
 # lhtDecode(lht_payload)
 
 if __name__ == "__main__":
-    print(decode("lopy-gronau", "NYYYGQ=="))
+    print(decode("lht-gronau", "y9oB7QOXBQAAf/8="))

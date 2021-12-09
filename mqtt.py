@@ -183,7 +183,6 @@ def ingest(payload_json):
     except KeyError:
         # This sensor doesn't have altitude for some reason, just set it to to None
         altitude = None
-    
 
     try:
         # Get cursor and write to table
