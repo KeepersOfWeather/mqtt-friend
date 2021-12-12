@@ -14,8 +14,11 @@ def lht_decode(payload):
 
     request = requests.get("https://lhtdecoderofnptx7a-test.functions.fnc.fr-par.scw.cloud/", data = json.dumps(data))
 
-
-    output = request.json()
+    try:
+        output = request.json()
+    except json.decoder.JSONDecodeError:
+        print(f"Cloud function could not decode payload: {payload}")
+        return {}
 
     decoded = {
         "mode": output['decoded']["Work_mode"],
