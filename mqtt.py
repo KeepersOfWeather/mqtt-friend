@@ -120,7 +120,7 @@ def ingest(payload_json):
 
     # The payload doesn't match the device or the device is unknown
     if not any(decoded_payload):
-        print("Decoder returned blank, not storing to database!")
+        print(f"Decoder for device {device_id} returned blank, not storing to database!")
         return
 
     try:
