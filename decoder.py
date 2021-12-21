@@ -75,12 +75,12 @@ def decode(device_id: str, payload: str):
 
         return ("lht", decoded)
     
-    elif device_id.startswith("py") and len(payload) == 8:
-        # This is definitly a pyCom
+    elif device_id.startswith("py") and len(payload) == 8 and 'wierden' in device_id or 'saxion' in device_id:
+        # This is definitly a pyCom from either wierden of saxion
         return ("py", py_decode(payload))
 
-    elif "haaksbergerstraat" in device_id and len(payload) == 8:
-        # This is definitly a pyCom
+    elif not device_id.startswith("lht") and len(payload) == 8 and "py" in device_id:
+        # This is definetly a pyCom of our own
         return ("lopy", lopy_decode(payload))
 
     else:
