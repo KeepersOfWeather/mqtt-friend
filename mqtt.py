@@ -171,6 +171,7 @@ def ingest(payload_json):
         return
 
     # latitude	float	
+    print(f"The payload_json = {payload_json}")
     latitude = payload_json["uplink_message"]["rx_metadata"][0]["location"]["latitude"]
 
     # longitude	float	
