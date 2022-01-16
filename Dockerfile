@@ -1,4 +1,4 @@
-FROM python:latest
+FROM python:latest # This docker image will use the latest version of python as its base
 
 WORKDIR /root
 
